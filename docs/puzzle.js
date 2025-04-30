@@ -1,10 +1,10 @@
-// Configuration
+// الإعدادات
 const ROWS = 3;
 const COLUMNS = 3;
 const EMPTY_TILE_VALUE = "3";
 const GOAL_ORDER = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-// Game state
+// حالة اللعبة
 let currTile;
 let otherTile;
 let turns = 0;
@@ -12,26 +12,26 @@ let imgOrder = [];
 let initialImgOrder = [];
 let isProcessing = false;
 
-// -------------------- Utility Functions --------------------
+// -------------------- دوال مساعدة --------------------
 
-// Toggle interaction state for all buttons and tiles
+// تشغيل أو إيقاف التفاعل مع كل الأزرار والبلاطات
 function toggleInteraction(enable) {
   isProcessing = !enable;
   
-  // Toggle buttons
+  // تشغيل/إيقاف الأزرار
   ["shuffle", "solve", "solveBFS", "solveUCS", "initState"].forEach(btnId => {
     const btn = document.getElementById(btnId);
     if (btn) btn.disabled = !enable;
   });
   
-  // Toggle draggable state for tiles
+  // تشغيل/إيقاف إمكانية سحب البلاطات
   const tiles = document.getElementById("board").getElementsByTagName("img");
   for (let tile of tiles) {
     tile.setAttribute("draggable", enable.toString());
   }
 }
 
-// Helper function to check if two arrays are equal
+// دالة مساعدة عشان نشوف إذا كان فيه مصفوفتين زي بعض
 function arraysEqual(a, b) {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
@@ -40,12 +40,7 @@ function arraysEqual(a, b) {
   return true;
 }
 
-// Count misplaced tiles
-function countMisplaced(puzzle, goal) {
-  return puzzle.filter((val, idx) => val !== goal[idx]).length;
-}
-
-// Count inversions in a puzzle state
+// نعد الانعكاسات في حالة اللغز
 function countInversions(puzzle) {
   let inversions = 0;
   
@@ -63,13 +58,13 @@ function countInversions(puzzle) {
   return inversions;
 }
 
-// Check if a puzzle configuration is solvable
+// نشوف إذا كان ترتيب اللغز ممكن يتحل ولا لأ
 function isSolvable(puzzle) {
-  // For 3x3 puzzle, a configuration is solvable if the number of inversions is even
+  // في اللغز 3×3، التكوين ممكن يتحل لو عدد الانعكاسات زوجي
   return countInversions(puzzle) % 2 === 0;
 }
 
-// Generate a solvable random order
+// عمل ترتيب عشوائي قابل للحل
 function generateSolvableOrder(goal) {
   let order;
   do {
@@ -79,7 +74,7 @@ function generateSolvableOrder(goal) {
   return order;
 }
 
-// Get current board state
+// نجيب حالة اللوحة الحالية
 function getCurrentBoardState() {
   const board = document.getElementById("board");
   const tiles = Array.from(board.getElementsByTagName("img"));
@@ -90,7 +85,7 @@ function getCurrentBoardState() {
   });
 }
 
-// Find empty tile position
+// نلاقي مكان البلاطة الفاضية
 function findEmptyTilePosition(boardState) {
   const emptyTilePos = boardState.indexOf(EMPTY_TILE_VALUE);
   return {
@@ -99,7 +94,7 @@ function findEmptyTilePosition(boardState) {
   };
 }
 
-// Apply solution moves with animation
+// ننفذ خطوات الحل مع الحركة
 function applySolutionMoves(moves) {
   if (moves.length === 0) {
     alert("اللغز محلول بالفعل!");
@@ -120,27 +115,27 @@ function applySolutionMoves(moves) {
     let fromTile = document.getElementById(move.from.row + "-" + move.from.col);
     let toTile = document.getElementById(move.to.row + "-" + move.to.col);
     
-    // Swap images
+    // نبدل الصور
     let tempSrc = fromTile.src;
     fromTile.src = toTile.src;
     toTile.src = tempSrc;
     
-    // Update turn counter
+    // نحدث عداد الحركات
     turns++;
     document.getElementById("turns").innerText = turns;
     
     moveIndex++;
-  }, 300); // 300ms between moves for animation
+  }, 300); // 300 مللي ثانية بين كل حركة عشان شكل الحركة
 }
 
-// -------------------- Game Logic Functions --------------------
+// -------------------- دوال منطق اللعبة --------------------
 
-// Create game board
+// ننشئ لوحة اللعبة
 function createBoard() {
   const board = document.getElementById("board");
   board.innerHTML = "";
   
-  // Make a copy of the current image order
+  // نعمل نسخة من ترتيب الصور الحالي
   let currentImgOrder = [...imgOrder];
   
   for (let r = 0; r < ROWS; r++) {
@@ -150,7 +145,7 @@ function createBoard() {
       tile.src = currentImgOrder.shift() + ".jpg";
       tile.setAttribute("draggable", "true");
 
-      // Add drag-and-drop event listeners
+      // نضيف أحداث السحب والإفلات
       tile.addEventListener("dragstart", dragStart);
       tile.addEventListener("dragover", dragOver);
       tile.addEventListener("dragenter", dragEnter);
@@ -163,15 +158,15 @@ function createBoard() {
   }
 }
 
-// Shuffle the puzzle
+// نخلط اللغز
 function shufflePuzzle() {
   if (isProcessing) return;
   toggleInteraction(false);
   
-  // Generate a new solvable order
+  // نعمل ترتيب جديد قابل للحل
   imgOrder = generateSolvableOrder(GOAL_ORDER);
   
-  // Update the board with the new order
+  // نحدث اللوحة بالترتيب الجديد
   const tiles = document.getElementById("board").getElementsByTagName("img");
   let currentImgOrder = [...imgOrder];
   
@@ -179,22 +174,17 @@ function shufflePuzzle() {
     tiles[i].src = currentImgOrder[i] + ".jpg";
   }
   
-  // Save initial state after shuffling
+  // نحفظ الحالة الأولية بعد الخلط
   initialImgOrder = [...imgOrder];
   
-  // Reset turn counter
+  // نعيد ضبط عداد الحركات
   turns = 0;
   document.getElementById("turns").innerText = turns;
-  
-  // Log diagnostic information
-  console.log("Inversions: " + countInversions(imgOrder));
-  console.log("Is solvable: " + (isSolvable(imgOrder) ? "Yes" : "No"));
-  console.log("Misplaced tiles: " + countMisplaced(imgOrder, GOAL_ORDER));
   
   toggleInteraction(true);
 }
 
-// Return to initial state
+// نرجع للحالة الأولية
 function returnToInitialState() {
   if (isProcessing) return;
   toggleInteraction(false);
@@ -205,27 +195,25 @@ function returnToInitialState() {
     return;
   }
   
-  // Update board with initial order
+  // نحدث اللوحة بالترتيب الأولي
   const tiles = document.getElementById("board").getElementsByTagName("img");
   
   for (let i = 0; i < tiles.length; i++) {
     tiles[i].src = initialImgOrder[i] + ".jpg";
   }
   
-  // Reset turn counter
+  // نعيد ضبط عداد الحركات
   turns = 0;
   document.getElementById("turns").innerText = turns;
-  
-  console.log("تم العودة إلى الحالة الأولية بعد الخلط");
   
   toggleInteraction(true);
 }
 
-// Check for win condition
+// نتأكد من انتهاء اللعبة
 function checkWin() {
   const currentOrder = getCurrentBoardState();
 
-  // Check if current order matches goal order
+  // نشوف لو الترتيب الحالي زي الترتيب المطلوب
   if (arraysEqual(currentOrder, GOAL_ORDER)) {
     setTimeout(() => {
       alert("مبروك! لقد حللت اللغز في " + turns + " حركة!");
@@ -233,7 +221,7 @@ function checkWin() {
   }
 }
 
-// -------------------- Drag & Drop Functions --------------------
+// -------------------- دوال السحب والإفلات --------------------
 
 function dragStart() {
   currTile = this;
@@ -248,7 +236,7 @@ function dragEnter(e) {
 }
 
 function dragLeave() {
-  // Can add visual effects here
+  // مش محتاجين حاجة هنا، بس الدالة لازم تكون موجودة
 }
 
 function dragDrop() {
@@ -256,10 +244,10 @@ function dragDrop() {
 }
 
 function dragEnd() {
-  // If algorithm is running, don't allow moves
+  // لو الخوارزمية شغالة، ما نسمحش بالحركة
   if (isProcessing) return;
   
-  // Check if target tile is the empty tile
+  // نشوف لو البلاطة المستهدفة هي البلاطة الفاضية
   if (!otherTile.src.includes(EMPTY_TILE_VALUE + ".jpg")) {
     return;
   }
@@ -267,45 +255,45 @@ function dragEnd() {
   let [r, c] = currTile.id.split("-").map(Number);
   let [r2, c2] = otherTile.id.split("-").map(Number);
 
-  // Check if tiles are adjacent
+  // نتأكد لو البلاطات متجاورة
   let isAdjacent = (
     (r === r2 && Math.abs(c - c2) === 1) ||
     (c === c2 && Math.abs(r - r2) === 1)
   );
 
   if (isAdjacent) {
-    // Swap tiles
+    // نبدل البلاطات
     let currImg = currTile.src;
     currTile.src = otherTile.src;
     otherTile.src = currImg;
 
-    // Update turn counter
+    // نحدث عداد الحركات
     turns++;
     document.getElementById("turns").innerText = turns;
     
-    // Check for win
+    // نشوف لو خلصت اللعبة
     checkWin();
   }
 }
 
-// -------------------- AI Solver Functions --------------------
+// -------------------- دوال الحل بالذكاء الاصطناعي --------------------
 
-// Calculate Manhattan distance heuristic
+// نحسب مسافة مانهاتن كمقياس استدلالي
 function calculateHeuristic(state, goal) {
   let totalDistance = 0;
   
   for (let i = 0; i < state.length; i++) {
     if (state[i] !== EMPTY_TILE_VALUE) {
-      // Find where this tile should be in the goal state
+      // نلاقي فين المفروض تكون البلاطة دي في الحالة النهائية
       let goalIndex = goal.indexOf(state[i]);
       let goalRow = Math.floor(goalIndex / COLUMNS);
       let goalCol = goalIndex % COLUMNS;
       
-      // Find where it currently is
+      // نلاقي هي فين حالياً
       let currentRow = Math.floor(i / COLUMNS);
       let currentCol = i % COLUMNS;
       
-      // Add Manhattan distance
+      // نضيف مسافة مانهاتن
       totalDistance += Math.abs(goalRow - currentRow) + Math.abs(goalCol - currentCol);
     }
   }
@@ -313,44 +301,44 @@ function calculateHeuristic(state, goal) {
   return totalDistance;
 }
 
-// Get possible moves from a state
+// نجيب الحركات الممكنة من حالة معينة
 function getPossibleMoves(state, isForAStar = true) {
   let moves = [];
   let directions = [
-    { dr: -1, dc: 0, name: 'up' },
-    { dr: 1, dc: 0, name: 'down' },
-    { dr: 0, dc: -1, name: 'left' },
-    { dr: 0, dc: 1, name: 'right' }
+    { dr: -1, dc: 0, name: 'فوق' },
+    { dr: 1, dc: 0, name: 'تحت' },
+    { dr: 0, dc: -1, name: 'شمال' },
+    { dr: 0, dc: 1, name: 'يمين' }
   ];
   
   for (let dir of directions) {
     let newRow = state.emptyPos.row + dir.dr;
     let newCol = state.emptyPos.col + dir.dc;
     
-    // Check if new position is valid
+    // نشوف لو المكان الجديد صح
     if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLUMNS) {
-      // Create new board state with the move applied
+      // نعمل حالة لوحة جديدة بعد تطبيق الحركة
       let newBoard = [...state.board];
       let oldPos = state.emptyPos.row * COLUMNS + state.emptyPos.col;
       let newPos = newRow * COLUMNS + newCol;
       
-      // Swap empty tile with the tile at new position
+      // نبدل البلاطة الفاضية مع البلاطة في المكان الجديد
       [newBoard[oldPos], newBoard[newPos]] = [newBoard[newPos], newBoard[oldPos]];
       
-      // Create move info
+      // نعمل معلومات الحركة
       let newMove = { 
         from: { row: newRow, col: newCol }, 
         to: { row: state.emptyPos.row, col: state.emptyPos.col } 
       };
       
-      // Create new state
+      // نعمل حالة جديدة
       let newState = {
         board: newBoard,
         emptyPos: { row: newRow, col: newCol },
         moves: [...state.moves, newMove]
       };
       
-      // Add A* specific properties if needed
+      // نضيف خصائص خوارزمية A* لو محتاجينها
       if (isForAStar) {
         newState.cost = state.cost + 1;
         newState.heuristic = calculateHeuristic(newBoard, GOAL_ORDER);
@@ -363,16 +351,16 @@ function getPossibleMoves(state, isForAStar = true) {
   return moves;
 }
 
-// A* Search Algorithm
+// خوارزمية البحث A*
 function solvePuzzle() {
   if (isProcessing) return;
   toggleInteraction(false);
   
-  // Get current state
+  // نجيب الحالة الحالية
   const currentState = getCurrentBoardState();
   const emptyPos = findEmptyTilePosition(currentState);
   
-  // Create initial state object
+  // نعمل كائن الحالة الأولية
   let initialState = {
     board: currentState,
     emptyPos: emptyPos,
@@ -381,7 +369,7 @@ function solvePuzzle() {
     heuristic: calculateHeuristic(currentState, GOAL_ORDER)
   };
   
-  // A* search
+  // البحث بخوارزمية A*
   let solution = aStarSearch(initialState);
   
   if (solution) {
@@ -401,57 +389,57 @@ function aStarSearch(initialState) {
   while (openSet.length > 0 && iterations < maxIterations) {
     iterations++;
     
-    // Sort by f(n) = g(n) + h(n) - cost plus heuristic
+    // نرتب حسب f(n) = g(n) + h(n) - التكلفة زائد المقياس الاستدلالي
     openSet.sort((a, b) => (a.cost + a.heuristic) - (b.cost + b.heuristic));
     
-    // Get the most promising state
+    // ناخد الحالة الأكثر وعداً
     let current = openSet.shift();
     
-    // Check if we've reached the goal
+    // نشوف لو وصلنا للهدف
     if (current.heuristic === 0) {
-      return current; // Solution found
+      return current; // لقينا الحل
     }
     
-    // Generate key for this state to track visited states
+    // نعمل مفتاح للحالة دي عشان نتتبع الحالات اللي زرناها
     let stateKey = current.board.join(',');
     
-    // Skip if we've seen this state before
+    // نتخطى لو شفنا الحالة دي قبل كده
     if (closedSet.has(stateKey)) {
       continue;
     }
     
-    // Mark as visited
+    // نعلم عليها كحالة زرناها
     closedSet.add(stateKey);
     
-    // Generate possible moves
+    // نولد الحركات الممكنة
     let possibleMoves = getPossibleMoves(current, true);
     
-    // Add new states to open set
+    // نضيف الحالات الجديدة للمجموعة المفتوحة
     for (let move of possibleMoves) {
       openSet.push(move);
     }
   }
   
-  return null; // No solution found
+  return null; // مفيش حل
 }
 
-// BFS Search Algorithm
+// خوارزمية البحث BFS
 function solvePuzzleBFS() {
   if (isProcessing) return;
   toggleInteraction(false);
   
-  // Get current state
+  // نجيب الحالة الحالية
   const currentState = getCurrentBoardState();
   const emptyPos = findEmptyTilePosition(currentState);
   
-  // Create initial state object
+  // نعمل كائن الحالة الأولية
   let initialState = {
     board: currentState,
     emptyPos: emptyPos,
     moves: []
   };
   
-  // BFS search
+  // البحث بخوارزمية BFS
   let solution = bfsSearch(initialState);
   
   if (solution) {
@@ -463,32 +451,32 @@ function solvePuzzleBFS() {
 }
 
 function bfsSearch(initialState) {
-  // Queue for states to explore
+  // قائمة انتظار للحالات اللي هنستكشفها
   let queue = [initialState];
   
-  // Set to keep track of visited states
+  // مجموعة عشان نتتبع الحالات اللي زرناها
   let visited = new Set();
   visited.add(initialState.board.join(','));
   
-  // Maximum number of iterations to prevent infinite loops
+  // أقصى عدد من التكرارات عشان منقعش في حلقة لانهائية
   let maxIterations = 100000;
   let iterations = 0;
   
   while (queue.length > 0 && iterations < maxIterations) {
     iterations++;
     
-    // Get next state from queue
+    // ناخد الحالة التالية من قائمة الانتظار
     let current = queue.shift();
     
-    // Check if we've reached the goal
+    // نشوف لو وصلنا للهدف
     if (arraysEqual(current.board, GOAL_ORDER)) {
-      return current; // Solution found
+      return current; // لقينا الحل
     }
     
-    // Generate possible moves
+    // نولد الحركات الممكنة
     let possibleMoves = getPossibleMoves(current, false);
     
-    // Add new states to queue
+    // نضيف الحالات الجديدة لقائمة الانتظار
     for (let move of possibleMoves) {
       let stateKey = move.board.join(',');
       if (!visited.has(stateKey)) {
@@ -498,26 +486,27 @@ function bfsSearch(initialState) {
     }
   }
   
-  return null; // No solution found
+  return null; // مفيش حل
 }
-// UCS Search Algorithm
+
+// خوارزمية البحث UCS
 function solvePuzzleUCS() {
   if (isProcessing) return;
   toggleInteraction(false);
   
-  // Get current state
+  // نجيب الحالة الحالية
   const currentState = getCurrentBoardState();
   const emptyPos = findEmptyTilePosition(currentState);
   
-  // Create initial state object
+  // نعمل كائن الحالة الأولية
   let initialState = {
     board: currentState,
     emptyPos: emptyPos,
     moves: [],
-    cost: 0  // Track the cost (number of moves)
+    cost: 0
   };
   
-  // UCS search
+  // البحث بخوارزمية UCS
   let solution = ucsSearch(initialState);
   
   if (solution) {
@@ -529,40 +518,39 @@ function solvePuzzleUCS() {
 }
 
 function ucsSearch(initialState) {
-  // Priority queue for states to explore, sorted by cost
+  // قائمة الأولويات للحالات اللي هنستكشفها، مرتبة حسب التكلفة
   let priorityQueue = [initialState];
   
-  // Set to keep track of visited states
+  // مجموعة عشان نتتبع الحالات اللي زرناها
   let visited = new Set();
   visited.add(initialState.board.join(','));
   
-  // Maximum number of iterations to prevent infinite loops
+  // أقصى عدد من التكرارات عشان منقعش في حلقة لانهائية
   let maxIterations = 100000;
   let iterations = 0;
   
   while (priorityQueue.length > 0 && iterations < maxIterations) {
     iterations++;
     
-    // Sort by cost (uniform cost search prioritizes lowest cost)
+    // نرتب حسب التكلفة (البحث بالتكلفة الموحدة بيعطي أولوية للتكلفة الأقل)
     priorityQueue.sort((a, b) => a.cost - b.cost);
     
-    // Get the state with lowest cost
+    // ناخد الحالة ذات التكلفة الأقل
     let current = priorityQueue.shift();
     
-    // Check if we've reached the goal
+    // نشوف لو وصلنا للهدف
     if (arraysEqual(current.board, GOAL_ORDER)) {
-      console.log(`UCS found solution in ${iterations} iterations with ${current.moves.length} moves`);
-      return current; // Solution found
+      return current; // لقينا الحل
     }
     
-    // Generate possible moves
+    // نولد الحركات الممكنة
     let possibleMoves = getPossibleMoves(current, false);
     
-    // Add new states to priority queue
+    // نضيف الحالات الجديدة لقائمة الأولويات
     for (let move of possibleMoves) {
       let stateKey = move.board.join(',');
       
-      // Add cost to the new state
+      // نضيف التكلفة للحالة الجديدة
       move.cost = current.cost + 1;
       
       if (!visited.has(stateKey)) {
@@ -572,33 +560,27 @@ function ucsSearch(initialState) {
     }
   }
   
-  console.log(`UCS failed after ${iterations} iterations`);
-  return null; // No solution found
-} 
+  return null; // مفيش حل
+}
 
-// -------------------- Initialization --------------------
+// -------------------- التهيئة الأولية --------------------
 window.onload = function() {
-  // Ensure starting order is solvable
+  // نتأكد إن الترتيب الأولي قابل للحل
   imgOrder = generateSolvableOrder(GOAL_ORDER);
   
-  // Create board
+  // نعمل اللوحة
   createBoard();
   
-  // Save initial state
+  // نحفظ الحالة الأولية
   initialImgOrder = [...imgOrder];
   
-  // Enable interactions
+  // نمكن التفاعل
   toggleInteraction(true);
   
-  // Set up event listeners for buttons
+  // نعد مستمعي الأحداث للأزرار
   document.getElementById("shuffle")?.addEventListener("click", shufflePuzzle);
   document.getElementById("solve")?.addEventListener("click", solvePuzzle);
   document.getElementById("solveBFS")?.addEventListener("click", solvePuzzleBFS);
   document.getElementById("initState")?.addEventListener("click", returnToInitialState);
   document.getElementById("solveUCS")?.addEventListener("click", solvePuzzleUCS);
-  
-  // Log diagnostic info
-  console.log("Initial order:", imgOrder);
-  console.log("Inversions: " + countInversions(imgOrder));
-  console.log("Is solvable: " + (isSolvable(imgOrder) ? "Yes" : "No"));
 }
