@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Slide Puzzle</title>
+        <link rel="stylesheet" href="puzzle.css">
+        <script src="puzzle.js"></script>
+    </head>
 
+    <body>
+        
+        <img id="title" src="./logo.png">
+        <div id="board">
+        </div>
+        <div class="controls">
+            <button id="shuffle">خلط اللغز</button>
+            <button id="solve">حل باستخدامA STAR</button>
+            <button id="solveBFS">حل باستخدام BFS</button>
+            <button id="initState">العودة إلى الحالة الأولية</button>
+            <div>الحركات: <span id="turns">0</span></div>
+          </div>
+          <!--
+        <h1>Turns: <span id="turns">0</span></h1>
+        -->
+    </body>
+</html>
