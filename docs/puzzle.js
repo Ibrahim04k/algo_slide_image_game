@@ -574,11 +574,7 @@ function ucsSearch(initialState) {
   
   console.log(`UCS failed after ${iterations} iterations`);
   return null; // No solution found
-}
-
-// Update the getPossibleMoves function to work with UCS
-// Note: We're using the existing getPossibleMoves function with isForAStar=false
-// This already provides the basic structure we need for UCS
+} 
 
 // -------------------- Initialization --------------------
 window.onload = function() {
