@@ -12,26 +12,21 @@ let imgOrder = [];
 let initialImgOrder = [];
 let isProcessing = false;
 
-// -------------------- دوال مساعدة --------------------
 
-// تشغيل أو إيقاف التفاعل مع كل الأزرار والبلاطات
 function toggleInteraction(enable) {
   isProcessing = !enable;
   
-  // تشغيل/إيقاف الأزرار
   ["shuffle", "solve", "solveBFS", "solveUCS", "initState"].forEach(btnId => {
     const btn = document.getElementById(btnId);
     if (btn) btn.disabled = !enable;
   });
   
-  // تشغيل/إيقاف إمكانية سحب البلاطات
   const tiles = document.getElementById("board").getElementsByTagName("img");
   for (let tile of tiles) {
     tile.setAttribute("draggable", enable.toString());
   }
 }
 
-// دالة مساعدة عشان نشوف إذا كان فيه مصفوفتين زي بعض
 function arraysEqual(a, b) {
   if (a.length !== b.length) return false;
   for (let i = 0; i < a.length; i++) {
@@ -39,8 +34,7 @@ function arraysEqual(a, b) {
   }
   return true;
 }
-
-// نعد الانعكاسات في حالة اللغز
+//عدد البلاطات اللي مش في مكانها
 function countInversions(puzzle) {
   let inversions = 0;
   
@@ -58,13 +52,11 @@ function countInversions(puzzle) {
   return inversions;
 }
 
-// نشوف إذا كان ترتيب اللغز ممكن يتحل ولا لأ
 function isSolvable(puzzle) {
   // في اللغز 3×3، التكوين ممكن يتحل لو عدد الانعكاسات زوجي
   return countInversions(puzzle) % 2 === 0;
 }
 
-// عمل ترتيب عشوائي قابل للحل
 function generateSolvableOrder(goal) {
   let order;
   do {
@@ -74,7 +66,6 @@ function generateSolvableOrder(goal) {
   return order;
 }
 
-// نجيب حالة اللوحة الحالية
 function getCurrentBoardState() {
   const board = document.getElementById("board");
   const tiles = Array.from(board.getElementsByTagName("img"));
@@ -85,7 +76,6 @@ function getCurrentBoardState() {
   });
 }
 
-// نلاقي مكان البلاطة الفاضية
 function findEmptyTilePosition(boardState) {
   const emptyTilePos = boardState.indexOf(EMPTY_TILE_VALUE);
   return {
@@ -94,7 +84,6 @@ function findEmptyTilePosition(boardState) {
   };
 }
 
-// ننفذ خطوات الحل مع الحركة
 function applySolutionMoves(moves) {
   if (moves.length === 0) {
     alert("اللغز محلول بالفعل!");
@@ -120,17 +109,14 @@ function applySolutionMoves(moves) {
     fromTile.src = toTile.src;
     toTile.src = tempSrc;
     
-    // نحدث عداد الحركات
     turns++;
     document.getElementById("turns").innerText = turns;
     
     moveIndex++;
-  }, 300); // 300 مللي ثانية بين كل حركة عشان شكل الحركة
+  }, 300);
 }
 
-// -------------------- دوال منطق اللعبة --------------------
 
-// ننشئ لوحة اللعبة
 function createBoard() {
   const board = document.getElementById("board");
   board.innerHTML = "";
@@ -158,12 +144,11 @@ function createBoard() {
   }
 }
 
-// نخلط اللغز
+
 function shufflePuzzle() {
   if (isProcessing) return;
   toggleInteraction(false);
   
-  // نعمل ترتيب جديد قابل للحل
   imgOrder = generateSolvableOrder(GOAL_ORDER);
   
   // نحدث اللوحة بالترتيب الجديد
@@ -184,7 +169,6 @@ function shufflePuzzle() {
   toggleInteraction(true);
 }
 
-// نرجع للحالة الأولية
 function returnToInitialState() {
   if (isProcessing) return;
   toggleInteraction(false);
@@ -209,7 +193,6 @@ function returnToInitialState() {
   toggleInteraction(true);
 }
 
-// نتأكد من انتهاء اللعبة
 function checkWin() {
   const currentOrder = getCurrentBoardState();
 
@@ -221,7 +204,6 @@ function checkWin() {
   }
 }
 
-// -------------------- دوال السحب والإفلات --------------------
 
 function dragStart() {
   currTile = this;
@@ -236,7 +218,6 @@ function dragEnter(e) {
 }
 
 function dragLeave() {
-  // مش محتاجين حاجة هنا، بس الدالة لازم تكون موجودة
 }
 
 function dragDrop() {
@@ -244,7 +225,6 @@ function dragDrop() {
 }
 
 function dragEnd() {
-  // لو الخوارزمية شغالة، ما نسمحش بالحركة
   if (isProcessing) return;
   
   // نشوف لو البلاطة المستهدفة هي البلاطة الفاضية
@@ -255,7 +235,7 @@ function dragEnd() {
   let [r, c] = currTile.id.split("-").map(Number);
   let [r2, c2] = otherTile.id.split("-").map(Number);
 
-  // نتأكد لو البلاطات متجاورة
+  // نتأكد لو البلاطات جمب بعض
   let isAdjacent = (
     (r === r2 && Math.abs(c - c2) === 1) ||
     (c === c2 && Math.abs(r - r2) === 1)
@@ -271,14 +251,12 @@ function dragEnd() {
     turns++;
     document.getElementById("turns").innerText = turns;
     
-    // نشوف لو خلصت اللعبة
     checkWin();
   }
 }
 
-// -------------------- دوال الحل بالذكاء الاصطناعي --------------------
+// ال algos
 
-// نحسب مسافة مانهاتن كمقياس استدلالي
 function calculateHeuristic(state, goal) {
   let totalDistance = 0;
   
@@ -351,7 +329,6 @@ function getPossibleMoves(state, isForAStar = true) {
   return moves;
 }
 
-// خوارزمية البحث A*
 function solvePuzzle() {
   if (isProcessing) return;
   toggleInteraction(false);
@@ -360,7 +337,7 @@ function solvePuzzle() {
   const currentState = getCurrentBoardState();
   const emptyPos = findEmptyTilePosition(currentState);
   
-  // نعمل كائن الحالة الأولية
+  // نعرف الinitial state
   let initialState = {
     board: currentState,
     emptyPos: emptyPos,
@@ -392,10 +369,8 @@ function aStarSearch(initialState) {
     // نرتب حسب f(n) = g(n) + h(n) - التكلفة زائد المقياس الاستدلالي
     openSet.sort((a, b) => (a.cost + a.heuristic) - (b.cost + b.heuristic));
     
-    // ناخد الحالة الأكثر وعداً
     let current = openSet.shift();
     
-    // نشوف لو وصلنا للهدف
     if (current.heuristic === 0) {
       return current; // لقينا الحل
     }
@@ -534,7 +509,7 @@ function ucsSearch(initialState) {
     
     // نرتب حسب التكلفة (البحث بالتكلفة الموحدة بيعطي أولوية للتكلفة الأقل)
     priorityQueue.sort((a, b) => a.cost - b.cost);
-    
+
     // ناخد الحالة ذات التكلفة الأقل
     let current = priorityQueue.shift();
     
@@ -550,7 +525,7 @@ function ucsSearch(initialState) {
     for (let move of possibleMoves) {
       let stateKey = move.board.join(',');
       
-      // نضيف التكلفة للحالة الجديدة
+      
       move.cost = current.cost + 1;
       
       if (!visited.has(stateKey)) {
@@ -560,24 +535,22 @@ function ucsSearch(initialState) {
     }
   }
   
-  return null; // مفيش حل
+  return null; 
 }
 
-// -------------------- التهيئة الأولية --------------------
 window.onload = function() {
-  // نتأكد إن الترتيب الأولي قابل للحل
+  // نتأكد إن الترتيب الأول قابل للحل
   imgOrder = generateSolvableOrder(GOAL_ORDER);
   
   // نعمل اللوحة
   createBoard();
   
-  // نحفظ الحالة الأولية
+  // نحفظ الحالة 
   initialImgOrder = [...imgOrder];
   
-  // نمكن التفاعل
+  // لو ينفع نتفاعل
   toggleInteraction(true);
   
-  // نعد مستمعي الأحداث للأزرار
   document.getElementById("shuffle")?.addEventListener("click", shufflePuzzle);
   document.getElementById("solve")?.addEventListener("click", solvePuzzle);
   document.getElementById("solveBFS")?.addEventListener("click", solvePuzzleBFS);
